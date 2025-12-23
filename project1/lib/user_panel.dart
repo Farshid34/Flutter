@@ -18,6 +18,7 @@ class _UserPanelState extends State<UserPanel> {
     ProfilePage(),
     CartPage(),
     OrdersPage(),
+    WalletPage(),
     SettingsPage(),
   ];
 
@@ -58,6 +59,10 @@ class _UserPanelState extends State<UserPanel> {
               label: 'Orders',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.account_balance_wallet), // آیکون کیف پول
+              label: 'Wallet',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.settings),
               label: 'Settings',
             ),
@@ -84,9 +89,6 @@ class _ProfilePageState extends State<ProfilePage> {
   String _originalPhone = '09393172068';
   String _originalEmail = 'f.farhadi9292@gmail.com';
   String _originalUsername = 'farshid';
-
-  double _walletBalance = 125.50; // موجودی اولیه کیف پول
-  final TextEditingController _chargeAmountController = TextEditingController();
 
   final TextEditingController _firstNameController = TextEditingController(
     text: 'Farshid',
@@ -1555,6 +1557,491 @@ class _OrdersPageState extends State<OrdersPage>
         ),
       ],
     );
+  }
+}
+
+// ==================== WALLET PAGE ====================
+class WalletPage extends StatefulWidget {
+  @override
+  State<WalletPage> createState() => _WalletPageState();
+}
+
+class _WalletPageState extends State<WalletPage> {
+  double _walletBalance = 125.50;
+  final TextEditingController _chargeAmountController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  final List<Map<String, dynamic>> _transactions = [
+    {
+      'type': 'charge',
+      'amount': 50.0,
+      'date': '2024-12-20',
+      'description': 'Initial charge',
+    },
+    {
+      'type': 'purchase',
+      'amount': -30.0,
+      'date': '2024-12-21',
+      'description': 'Order #1234',
+    },
+    {
+      'type': 'charge',
+      'amount': 100.0,
+      'date': '2024-12-22',
+      'description': 'Wallet top-up',
+    },
+  ];
+
+  void _chargeWallet() {
+    if (_formKey.currentState!.validate()) {
+      double amount = double.parse(_chargeAmountController.text);
+
+      setState(() {
+        _walletBalance += amount;
+        _transactions.insert(0, {
+          'type': 'charge',
+          'amount': amount,
+          'date': '2024-12-23',
+          'description': 'Wallet charge',
+        });
+      });
+
+      _chargeAmountController.clear();
+
+      Fluttertoast.showToast(
+        msg: '✅ Wallet charged successfully! +\$${amount.toStringAsFixed(2)}',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFfdfbfb), Color(0xFFebedee)],
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header with Balance
+            Container(
+              padding: EdgeInsets.all(25),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        'My Wallet',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 30),
+                  // Balance Card
+                  Container(
+                    padding: EdgeInsets.all(25),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.3),
+                          Colors.white.withOpacity(0.1),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Available Balance',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '\$',
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              _walletBalance.toStringAsFixed(2),
+                              style: TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: -1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Scrollable Content
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Charge Section
+                    Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 15,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Color(0xFF667eea),
+                                          Color(0xFF764ba2),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      Icons.add_circle,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Charge Wallet',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              TextFormField(
+                                controller: _chargeAmountController,
+                                keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
+                                decoration: InputDecoration(
+                                  labelText: 'Amount',
+                                  hintText: 'Enter amount to charge',
+                                  prefixIcon: Icon(
+                                    Icons.attach_money,
+                                    color: Color(0xFF667eea),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.grey[50],
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.shade200,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: BorderSide(
+                                      color: Color(0xFF667eea),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: BorderSide(
+                                      color: Colors.red,
+                                      width: 1,
+                                    ),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter amount';
+                                  }
+                                  final amount = double.tryParse(value);
+                                  if (amount == null || amount <= 0) {
+                                    return 'Please enter a valid amount';
+                                  }
+                                  if (amount > 1000) {
+                                    return 'Maximum charge amount is \$1000';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              SizedBox(height: 15),
+                              Row(
+                                children: [
+                                  _buildQuickAmount(10),
+                                  SizedBox(width: 10),
+                                  _buildQuickAmount(25),
+                                  SizedBox(width: 10),
+                                  _buildQuickAmount(50),
+                                  SizedBox(width: 10),
+                                  _buildQuickAmount(100),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 55,
+                                child: ElevatedButton(
+                                  onPressed: _chargeWallet,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    padding: EdgeInsets.zero,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  child: Ink(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Color(0xFF667eea),
+                                          Color(0xFF764ba2),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add_card,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            'Charge Now',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Transaction History Header
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Icon(Icons.history, color: Color(0xFF667eea)),
+                          SizedBox(width: 8),
+                          Text(
+                            'Transaction History',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 15),
+
+                    // Transaction List
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: _transactions.length,
+                      itemBuilder: (context, index) {
+                        return _buildTransactionItem(_transactions[index]);
+                      },
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAmount(int amount) {
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          _chargeAmountController.text = amount.toString();
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Color(0xFF667eea).withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(10),
+            color: Color(0xFF667eea).withOpacity(0.05),
+          ),
+          child: Text(
+            '\$$amount',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF667eea),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionItem(Map<String, dynamic> transaction) {
+    bool isCharge = transaction['type'] == 'charge';
+    double amount = transaction['amount'];
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: isCharge
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isCharge ? Icons.arrow_downward : Icons.arrow_upward,
+              color: isCharge ? Colors.green : Colors.red,
+              size: 20,
+            ),
+          ),
+          SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction['description'],
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  transaction['date'],
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '${amount >= 0 ? '+' : ''}\$${amount.abs().toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isCharge ? Colors.green : Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _chargeAmountController.dispose();
+    super.dispose();
   }
 }
 
